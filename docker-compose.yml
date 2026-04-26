@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: campusconnect
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:dev_password@postgres:5432/campusconnect
+      JWT_SECRET: supersecretkey123!@#
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    depends_on:
+      - postgres
+    networks:
+      - campusconnect_net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - campusconnect_net
+
+volumes:
+  postgres_data:
+
+networks:
+  campusconnect_net:
+    driver: bridge
