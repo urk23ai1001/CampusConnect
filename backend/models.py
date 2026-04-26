@@ -149,3 +149,37 @@ class LeaderboardCache(Base):
     rank = Column(Integer)
     total_points = Column(Integer)
     updated_at = Column(DateTime, default=datetime.utcnow)
+
+# ==================== DUEL MODE 1v1 ====================
+class DuelStatusEnum(str, enum.Enum):
+    pending = "pending"
+    active = "active"
+    completed = "completed"
+    cancelled = "cancelled"
+
+class Duel(Base):
+    __tablename__ = "duels"
+
+    id = Column(Integer, primary_key=True, index=True)
+    challenger_id = Column(Integer, ForeignKey("ambassadors.id"))
+    challenged_id = Column(Integer, ForeignKey("ambassadors.id"))
+    task_id = Column(Integer, ForeignKey("tasks.id"))
+    org_id = Column(Integer, ForeignKey("organizations.id"))
+    challenger_score = Column(Integer, default=0)
+    challenged_score = Column(Integer, default=0)
+    winner_id = Column(Integer, ForeignKey("ambassadors.id"), nullable=True)
+    status = Column(Enum(DuelStatusEnum), default=DuelStatusEnum.pending)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# ==================== ACTIVITY HEATMAP ====================
+class ActivityLog(Base):
+    __tablename__ = "activity_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    ambassador_id = Column(Integer, ForeignKey("ambassadors.id"))
+    activity_type = Column(String)  # submission, vote, duel, login
+    points = Column(Integer, default=0)
+    date = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
